@@ -1,1 +1,1 @@
-include ':app', ':slides_lib'
+include ':slides_app', ':slides_lib'
