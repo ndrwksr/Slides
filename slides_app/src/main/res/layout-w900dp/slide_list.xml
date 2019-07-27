@@ -27,7 +27,7 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         app:layoutManager="LinearLayoutManager"
-        tools:context="com.example.slides_app.SlideListActivity"
+        tools:context="com.ndrwksr.slides_app.SlideListActivity"
         tools:listitem="@layout/slide_list_item" />
 
     <FrameLayout
