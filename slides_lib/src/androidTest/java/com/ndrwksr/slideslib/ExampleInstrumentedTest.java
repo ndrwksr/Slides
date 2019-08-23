@@ -1,4 +1,4 @@
-package com.ndrwksr.slides;
+package com.ndrwksr.slideslib;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

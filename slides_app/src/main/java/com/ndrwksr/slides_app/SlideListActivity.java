@@ -4,19 +4,29 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.ndrwksr.slides.SlideListItem;
-import com.ndrwksr.slides.SlideLoader;
-import com.ndrwksr.slides.slideFragments.SlideFragment;
+import com.google.gson.reflect.TypeToken;
+import com.ndrwksr.slides_app.slides.CustomSlide;
+import com.ndrwksr.slideslib.SlideLoader;
+import com.ndrwksr.slideslib.exceptions.BadSlideTypeException;
+import com.ndrwksr.slideslib.Slide;
+import com.ndrwksr.slideslib.SlideFragment;
+import com.ndrwksr.slideslib.exceptions.BadSlidesException;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * An activity representing a list of Items. This activity
@@ -34,8 +44,21 @@ public class SlideListActivity extends AppCompatActivity {
      */
     private boolean mTwoPane;
 
+    private final SlideLoader mSlideLoader = new SlideLoader();
+
+    public SlideListActivity() {
+        Map<String, TypeToken<? extends Slide>> typeTokenMap = new HashMap<>();
+        typeTokenMap.put(CustomSlide.TYPE_STRING, new TypeToken<CustomSlide>() {
+        });
+        try {
+            mSlideLoader.registerSlideTypes(typeTokenMap);
+        } catch (BadSlideTypeException e) {
+            Log.e(SlideLoader.PARSE_EXCEPTION_TAG, "Couldn't register custom slide type", e);
+        }
+    }
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_slide_list);
 
@@ -56,38 +79,45 @@ public class SlideListActivity extends AppCompatActivity {
         setupRecyclerView((RecyclerView) recyclerView);
     }
 
-    private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        SlideLoader slideLoader = new SlideLoader(getApplicationContext());
-        recyclerView.setAdapter(new SlideListItemRecyclerViewAdapter(this, slideLoader.getSlideList(), mTwoPane));
+    private void setupRecyclerView(@NonNull final RecyclerView recyclerView) {
+        InputStreamReader reader;
+        try {
+            reader = new InputStreamReader(getApplicationContext().getAssets().open("slides.json"));
+            recyclerView.setAdapter(new SlideRecyclerViewAdapter(this, mSlideLoader.getSlides(reader), mTwoPane));
+        } catch (IOException | BadSlidesException e) {
+            Log.e(SlideLoader.PARSE_EXCEPTION_TAG, "Couldn't open slides file", e);
+        }
     }
 
-    public static class SlideListItemRecyclerViewAdapter
-            extends RecyclerView.Adapter<SlideListItemRecyclerViewAdapter.ViewHolder> {
+    public static class SlideRecyclerViewAdapter
+            extends RecyclerView.Adapter<SlideRecyclerViewAdapter.ViewHolder> {
 
-        private final List<SlideListItem> mValues;
+        private final List<Slide> mValues;
         private final SlideListActivity mParentActivity;
         private final boolean mTwoPane;
         private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                SlideListItem slideListItem = (SlideListItem) view.getTag();
+            public void onClick(@NonNull final View view) {
+                Slide slide = (Slide) view.getTag();
                 if (mTwoPane) {
-                    SlideFragment fragment = SlideFragment.createFromSlideListItem(slideListItem);
+                    SlideFragment fragment = slide.getFragment();
                     mParentActivity.getSupportFragmentManager().beginTransaction()
                             .replace(R.id.slide_container, fragment)
                             .commit();
                 } else {
                     Context context = view.getContext();
                     Intent intent = new Intent(context, SlideDetailActivity.class);
-                    intent.putExtra(SlideListItem.INTENT_NAME, slideListItem);
+                    intent.putExtra(Slide.INTENT_NAME, slide);
                     context.startActivity(intent);
                 }
             }
         };
 
-        SlideListItemRecyclerViewAdapter(SlideListActivity parent,
-                                         List<SlideListItem> items,
-                                         boolean twoPane) {
+        SlideRecyclerViewAdapter(
+                @NonNull final SlideListActivity parent,
+                @NonNull final List<Slide> items,
+                final boolean twoPane
+        ) {
             mValues = items;
             mParentActivity = parent;
             mTwoPane = twoPane;
@@ -95,15 +125,21 @@ public class SlideListActivity extends AppCompatActivity {
 
         @Override
         @NonNull
-        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        public ViewHolder onCreateViewHolder(
+                @NonNull final ViewGroup parent,
+                final int viewType
+        ) {
             View view = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.slide_list_item, parent, false);
             return new ViewHolder(view);
         }
 
         @Override
-        public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
-            holder.mIdView.setText(mValues.get(position).getSlideTitle());
+        public void onBindViewHolder(
+                @NonNull final ViewHolder holder,
+                final int position
+        ) {
+            holder.mIdView.setText(mValues.get(position).getTitle());
 
             holder.itemView.setTag(mValues.get(position));
             holder.itemView.setOnClickListener(mOnClickListener);
@@ -117,7 +153,7 @@ public class SlideListActivity extends AppCompatActivity {
         class ViewHolder extends RecyclerView.ViewHolder {
             final TextView mIdView;
 
-            ViewHolder(View view) {
+            ViewHolder(@NonNull final View view) {
                 super(view);
                 mIdView = view.findViewById(R.id.id_text);
             }

@@ -7,8 +7,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
-import com.ndrwksr.slides.SlideListItem;
-import com.ndrwksr.slides.slideFragments.SlideFragment;
+import com.ndrwksr.slideslib.Slide;
+import com.ndrwksr.slideslib.SlideFragment;
 
 /**
  * An activity representing a single Item detail screen. This
@@ -31,8 +31,8 @@ public class SlideDetailActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        SlideListItem slideListItem = (SlideListItem) getIntent().getSerializableExtra(SlideListItem.INTENT_NAME);
-        toolbar.setTitle(slideListItem.getSlideTitle());
+        Slide slide = (Slide) getIntent().getSerializableExtra(Slide.INTENT_NAME);
+        toolbar.setTitle(slide.getTitle());
 
         // savedInstanceState is non-null when there is fragment state
         // saved from previous configurations of this activity
@@ -45,7 +45,7 @@ public class SlideDetailActivity extends AppCompatActivity {
         //
         if (savedInstanceState == null) {
             // Get the fragment for the provided type
-            SlideFragment fragment = SlideFragment.createFromSlideListItem(slideListItem);
+            SlideFragment fragment = slide.getFragment();
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.slide_container, fragment)
                     .commit();
