@@ -8,8 +8,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
 import com.ndrwksr.slideslib.exceptions.BadSlideDataException;
-import com.ndrwksr.slideslib.exceptions.BadSlidesException;
 import com.ndrwksr.slideslib.exceptions.BadSlideTypeException;
+import com.ndrwksr.slideslib.exceptions.BadSlidesException;
 import com.ndrwksr.slideslib.slides.DocSlide;
 import com.ndrwksr.slideslib.slides.HtmlFileSlide;
 import com.ndrwksr.slideslib.slides.HtmlSlide;
@@ -53,39 +53,6 @@ public class SlideLoader {
         return Collections.unmodifiableMap(typeTokenMap);
     }
 
-    @NonNull
-    public static Slide skeletonToSlide(
-            @NonNull final SlideSkeleton slideSkeleton,
-            @NonNull final Map<String, TypeToken<? extends Slide>> typeTokenMap
-    ) throws BadSlideTypeException, BadSlideDataException {
-        Objects.requireNonNull(slideSkeleton, "slideSkeleton is required.");
-        Objects.requireNonNull(typeTokenMap, "typeTokenMap is required.");
-
-        final String slideType = slideSkeleton.getType();
-        if (Strings.isEmpty(slideType)) {
-            throw new BadSlideTypeException(slideType, null);
-        }
-
-        final TypeToken<? extends Slide> typeToken = typeTokenMap.get(slideType);
-        if (typeToken == null) {
-            throw new BadSlideTypeException(slideType, null);
-        }
-
-        final String slideData = slideSkeleton.getData();
-        if (Strings.isEmpty(slideData)) {
-            throw new BadSlideDataException(slideData);
-        }
-
-        final Slide slide;
-        try {
-            slide = (new Gson()).fromJson(slideData, typeToken.getType());
-        } catch (JsonParseException e) {
-            throw new BadSlideDataException(slideData);
-        }
-
-        return slide;
-    }
-
     // Load slides from provided reader
     // Stores per-slide exceptions in loadExceptions so that bad slides can be ignored
     // BadSlidesException will be thrown if slide skeletons can't be read
@@ -114,7 +81,7 @@ public class SlideLoader {
             } else {
                 try {
                     // If skeleton was successfully deserialized, add to loadedSlides
-                    final Slide slide = skeletonToSlide(slideSkeleton, typeTokenMap);
+                    final Slide slide = slideSkeleton.toSlide(typeTokenMap);
                     loadedSlides.add(slide);
                 } catch (BadSlideTypeException e) { // Else log failure and skip this skeleton
                     Log.e(PARSE_EXCEPTION_TAG, "Got bad slide type: " + e.getSlideType(), e);

@@ -32,7 +32,7 @@ public class SlideDetailActivity extends AppCompatActivity {
         }
 
         Slide slide = (Slide) getIntent().getSerializableExtra(Slide.INTENT_NAME);
-        toolbar.setTitle(slide.getTitle());
+        getSupportActionBar().setTitle(slide.getTitle());
 
         // savedInstanceState is non-null when there is fragment state
         // saved from previous configurations of this activity

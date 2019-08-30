@@ -4,7 +4,6 @@ import com.google.gson.reflect.TypeToken;
 import com.ndrwksr.slideslib.exceptions.BadSlideDataException;
 import com.ndrwksr.slideslib.exceptions.BadSlideTypeException;
 import com.ndrwksr.slideslib.exceptions.BadSlidesException;
-import com.ndrwksr.slideslib.slides.TextSlide;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -26,7 +25,6 @@ import static org.mockito.Mockito.verify;
 public class SlideLoaderTest {
     // Calling SlideLoader.loadSlides calls read(char[], int, int) on the ISR exactly 3 times.
     private static final int LOAD_SLIDES_READ_INVOCATIONS = 3;
-    private static final String CONTENT_TEST = "{\"content\":\"test\"}";
 
     @Rule
     public MockitoRule mockitoRule = MockitoJUnit.rule();
@@ -182,64 +180,6 @@ public class SlideLoaderTest {
         ).getBytes()));
         InputStreamReader spyIsr = Mockito.spy(realIsr);
         slideLoader.getSlides(spyIsr);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void skeletonToSlide_nullSkeleton() throws BadSlideDataException, BadSlideTypeException {
-        Map<String, TypeToken<? extends Slide>> typeTokenMap = SlideLoader.makeDefaultTokenMap();
-        SlideLoader.skeletonToSlide(null, typeTokenMap);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void skeletonToSlide_nullMap() throws BadSlideDataException, BadSlideTypeException {
-        SlideSkeleton skeleton = new SlideSkeleton("text", CONTENT_TEST);
-        SlideLoader.skeletonToSlide(skeleton, null);
-
-    }
-
-    @Test(expected = BadSlideTypeException.class)
-    public void skeletonToSlide_skeletonWithoutType() throws BadSlideDataException, BadSlideTypeException {
-        Map<String, TypeToken<? extends Slide>> typeTokenMap = SlideLoader.makeDefaultTokenMap();
-        SlideSkeleton skeleton = new SlideSkeleton("", CONTENT_TEST);
-        SlideLoader.skeletonToSlide(skeleton, typeTokenMap);
-    }
-
-
-    @Test(expected = BadSlideTypeException.class)
-    public void skeletonToSlide_skeletonTypeNotInMap() throws BadSlideDataException, BadSlideTypeException {
-        Map<String, TypeToken<? extends Slide>> typeTokenMap = SlideLoader.makeDefaultTokenMap();
-        SlideSkeleton skeleton = new SlideSkeleton("'DROP TABLE USERS", CONTENT_TEST);
-        SlideLoader.skeletonToSlide(skeleton, typeTokenMap);
-    }
-
-    @Test(expected = BadSlideDataException.class)
-    public void skeletonToSlide_skeletonWithNullData() throws BadSlideDataException, BadSlideTypeException {
-        Map<String, TypeToken<? extends Slide>> typeTokenMap = SlideLoader.makeDefaultTokenMap();
-        SlideSkeleton skeleton = new SlideSkeleton("text", null);
-        SlideLoader.skeletonToSlide(skeleton, typeTokenMap);
-    }
-
-    @Test(expected = BadSlideDataException.class)
-    public void skeletonToSlide_skeletonWithEmptyData() throws BadSlideDataException, BadSlideTypeException {
-        Map<String, TypeToken<? extends Slide>> typeTokenMap = SlideLoader.makeDefaultTokenMap();
-        SlideSkeleton skeleton = new SlideSkeleton("text", "");
-        SlideLoader.skeletonToSlide(skeleton, typeTokenMap);
-    }
-
-
-    @Test(expected = BadSlideDataException.class)
-    public void skeletonToSlide_skeletonWithBadData() throws BadSlideDataException, BadSlideTypeException {
-        Map<String, TypeToken<? extends Slide>> typeTokenMap = SlideLoader.makeDefaultTokenMap();
-        SlideSkeleton skeleton = new SlideSkeleton("text", "{]]This is!some@awful ,,JSON\"");
-        SlideLoader.skeletonToSlide(skeleton, typeTokenMap);
-    }
-
-    @Test
-    public void skeletonToSlide_validArguments() throws BadSlideDataException, BadSlideTypeException {
-        Map<String, TypeToken<? extends Slide>> typeTokenMap = SlideLoader.makeDefaultTokenMap();
-        SlideSkeleton skeleton = new SlideSkeleton("text", CONTENT_TEST);
-        Slide slide = SlideLoader.skeletonToSlide(skeleton, typeTokenMap);
-        assert slide instanceof TextSlide;
-        assert slide.getContent().equals("test");
+        assert slideLoader.getLoadExceptions().size() == 0;
     }
 }
