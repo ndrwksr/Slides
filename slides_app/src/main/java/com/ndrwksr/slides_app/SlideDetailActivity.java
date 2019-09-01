@@ -45,7 +45,7 @@ public class SlideDetailActivity extends AppCompatActivity {
         //
         if (savedInstanceState == null) {
             // Get the fragment for the provided type
-            SlideFragment fragment = slide.getFragment();
+            SlideFragment fragment = slide.makeFragment();
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.slide_container, fragment)
                     .commit();

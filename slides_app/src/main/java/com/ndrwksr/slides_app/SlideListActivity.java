@@ -16,14 +16,14 @@ import android.widget.TextView;
 
 import com.google.gson.reflect.TypeToken;
 import com.ndrwksr.slides_app.slides.CustomSlide;
-import com.ndrwksr.slideslib.SlideLoader;
-import com.ndrwksr.slideslib.exceptions.BadSlideTypeException;
 import com.ndrwksr.slideslib.Slide;
 import com.ndrwksr.slideslib.SlideFragment;
+import com.ndrwksr.slideslib.SlideLoader;
+import com.ndrwksr.slideslib.exceptions.BadSlideTypeException;
 import com.ndrwksr.slideslib.exceptions.BadSlidesException;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,10 +80,10 @@ public class SlideListActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView(@NonNull final RecyclerView recyclerView) {
-        InputStreamReader reader;
+
         try {
-            reader = new InputStreamReader(getApplicationContext().getAssets().open("slides.json"));
-            recyclerView.setAdapter(new SlideRecyclerViewAdapter(this, mSlideLoader.getSlides(reader), mTwoPane));
+            final InputStream stream = getApplicationContext().getAssets().open("slides.json");
+            recyclerView.setAdapter(new SlideRecyclerViewAdapter(this, mSlideLoader.getSlides(stream), mTwoPane));
         } catch (IOException | BadSlidesException e) {
             Log.e(SlideLoader.PARSE_EXCEPTION_TAG, "Couldn't open slides file", e);
         }
@@ -100,7 +100,7 @@ public class SlideListActivity extends AppCompatActivity {
             public void onClick(@NonNull final View view) {
                 Slide slide = (Slide) view.getTag();
                 if (mTwoPane) {
-                    SlideFragment fragment = slide.getFragment();
+                    SlideFragment fragment = slide.makeFragment();
                     mParentActivity.getSupportFragmentManager().beginTransaction()
                             .replace(R.id.slide_container, fragment)
                             .commit();

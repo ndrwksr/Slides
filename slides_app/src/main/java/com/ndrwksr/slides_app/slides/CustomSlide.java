@@ -34,7 +34,7 @@ public class CustomSlide extends Slide {
     }
 
     @Override
-    public SlideFragment makeFragment() {
+    public SlideFragment instantiateFragment() {
         return new CustomSlide.CustomSlideFragment();
     }
 

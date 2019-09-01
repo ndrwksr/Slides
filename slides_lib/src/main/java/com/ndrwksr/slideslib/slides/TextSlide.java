@@ -16,11 +16,23 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+/**
+ * A {@link Slide} which displays the content in a {@link TextView}
+ */
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class TextSlide extends Slide {
+    /**
+     * The key for this type of slide in type token maps.
+     */
     public static final String TYPE_STRING = "text";
 
+    /**
+     * All-args constructor (required for Lombok).
+     * @param slideId The ID of the slide.
+     * @param slideTitle The title of the slide.
+     * @param slideContent The content of the slide.
+     */
     public TextSlide(
             @NonNull final String slideId,
             @NonNull final String slideTitle,
@@ -30,10 +42,13 @@ public class TextSlide extends Slide {
     }
 
     @Override
-    protected SlideFragment makeFragment() {
+    protected SlideFragment instantiateFragment() {
         return new TextSlideFragment();
     }
 
+    /**
+     * The {@link android.support.v4.app.Fragment} for {@link TextSlide}.
+     */
     @NoArgsConstructor
     public static class TextSlideFragment extends SlideFragment {
         /**

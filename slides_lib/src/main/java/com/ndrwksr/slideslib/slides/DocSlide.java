@@ -19,15 +19,35 @@ import com.ndrwksr.slideslib.SlideFragment;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
+/**
+ * A {@link Slide} which has static text at the top, and an editable text field on the bottom. The
+ * text entered into the editable text field is persisted to a key/value store with the key in
+ * {@link DocSlide#persistedDataKey}.
+ */
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class DocSlide extends Slide {
+    /**
+     * The key for this type of slide in type token maps.
+     */
     public static final String TYPE_STRING = "doc";
 
+    /**
+     * The key used for persisting the text entered into the EditText view.
+     */
     @NonNull
     private final String persistedDataKey;
 
+    /**
+     * All-args constructor (required for Lombok).
+     *
+     * @param slideId          The ID of the slide.
+     * @param slideTitle       The title of the slide.
+     * @param slideContent     The content of the slide.
+     * @param persistedDataKey The key used for persisting the text entered into the EditText view.
+     */
     public DocSlide(
             @NonNull final String slideId,
             @NonNull final String slideTitle,
@@ -39,16 +59,23 @@ public class DocSlide extends Slide {
     }
 
     @Override
-    protected SlideFragment makeFragment() {
+    protected SlideFragment instantiateFragment() {
         return new DocSlideFragment();
     }
 
+    /**
+     * The {@link android.support.v4.app.Fragment} for {@link DocSlide}.
+     */
+    @NoArgsConstructor
     public static class DocSlideFragment extends SlideFragment<DocSlide> {
-
+        /**
+         * The text view for displaying the slide's content.
+         */
         private TextView mTextView;
 
         /**
-         * The edit text view for displaying the slide's contents.
+         * The edit text view that the user can put text into. The text entered into this field is
+         * persisted with a key/value store with the key being {@link DocSlide#persistedDataKey}.
          */
         private EditText mEditText;
 
@@ -64,7 +91,7 @@ public class DocSlide extends Slide {
 
             mTextView.setText(mSlide.getContent());
 
-
+            // TODO: Refactor persistence
             final String slideUserDataPref = mSlide.getPersistedDataKey();
             final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(inflater.getContext());
             final String editTextContent = preferences.getString(slideUserDataPref, "");

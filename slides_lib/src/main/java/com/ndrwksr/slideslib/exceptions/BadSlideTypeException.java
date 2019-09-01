@@ -1,41 +1,38 @@
 package com.ndrwksr.slideslib.exceptions;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.google.gson.reflect.TypeToken;
-import com.ndrwksr.slideslib.Strings;
 import com.ndrwksr.slideslib.Slide;
+import com.ndrwksr.slideslib.Strings;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
+/**
+ * Thrown when the type for a {@link Slide} was invalid, either because the type field of a
+ * {@link com.ndrwksr.slideslib.SlideSkeleton} was null/empty or because said field wasn't empty but
+ * there was no entry in the {@link com.ndrwksr.slideslib.SlideLoader}'s type map with that key.
+ */
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class BadSlideTypeException extends Exception {
+    /**
+     * The invalid type.
+     */
     @Getter
     private final String slideType;
-    @Getter
-    private final TypeToken<? extends Slide> typeToken;
 
+    /**
+     * @param message   An explanation for why the exception was thrown.
+     * @param slideType The invalid type in the guilty {@link com.ndrwksr.slideslib.SlideSkeleton}.
+     */
     public BadSlideTypeException(
-            @Nullable final String slideType,
-            @Nullable final TypeToken<? extends Slide> typeToken
+            @NonNull final String message,
+            @Nullable final String slideType
     ) {
-        super("Bad slide type: " + Strings.clarifyStringIfMissing(slideType) + "; " +
-                "type token: " + Strings.clarifyStringIfMissing(
-                typeToken == null ? null : typeToken.toString())
-        );
-        this.slideType = slideType;
-        this.typeToken = typeToken;
-    }
-
-    public BadSlideTypeException(
-            @Nullable final String slideType,
-            @Nullable final TypeToken<? extends Slide> typeToken,
-            @Nullable final Throwable cause
-    ) {
-        this(slideType, typeToken);
-        this.initCause(cause);
+        super(message);
+        this.slideType = Strings.clarifyStringIfMissing(slideType);
     }
 }
